@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miori Store - ร้านค้า & สะสมแต้ม</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        miori: {
+                            pink: '#FFE5EC',
+                            darkpink: '#FFB3C6',
+                            rose: '#FF8FAB',
+                            deep: '#FB6F92',
+                            purple: '#9B5DE5',
+                            accent: '#F15BB5',
+                            cream: '#FFF9FB',
+                            text: '#4A3E3D'
+                        }
+                    },
+                    fontFamily: {
+                        kanit: ['Kanit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #F8F9FA;
+            color: #4A3E3D;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFE5EC;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF8FAB;
+            border-radius: 10px;
+        }
+        .banner-aspect {
+            aspect-ratio: 1122 / 495;
+        }
+        .admin-edit-btn {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body class="pb-24 pt-16 md:pb-10 max-w-md md:max-w-4xl mx-auto bg-white min-h-screen shadow-xl relative border-x border-pink-100">
+
+    <!-- Top Navigation Header -->
+    <header class="fixed top-0 left-0 right-0 max-w-md md:max-w-4xl mx-auto bg-white/90 backdrop-blur-md z-40 border-b border-pink-100 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-miori-rose to-miori-purple flex items-center justify-center text-white font-bold shadow-md">
+                M
+            </div>
+            <span class="font-bold text-lg tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-miori-deep to-miori-purple">
+                Miori Shop
+            </span>
+        </div>
+
+        <!-- Search & Toggle Admin Mode -->
+        <div class="flex items-center space-x-3">
+            <button onclick="toggleSearchModal()" class="w-8 h-8 rounded-full bg-pink-50 flex items-center justify-center text-miori-deep hover:bg-pink-100 transition">
+                <i class="fas fa-search text-sm"></i>
+            </button>
+            <button id="adminToggleBtn" onclick="toggleAdminMode()" class="px-3 py-1 text-xs font-medium rounded-full border border-miori-deep text-miori-deep hover:bg-miori-deep hover:text-white transition flex items-center gap-1 shadow-sm">
+                <i class="fas fa-user-shield"></i>
+                <span id="adminStatusText">โหมดทั่วไป</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Admin Mode Notice Floating Bar -->
+    <div id="adminNoticeBar" class="hidden bg-purple-600 text-white text-xs py-2 px-4 text-center font-medium sticky top-14 z-30 flex justify-between items-center shadow-md animate-bounce">
+        <span><i class="fas fa-edit mr-1"></i> คุณอยู่ในโหมดแอดมิน: สามารถคลิกปุ่ม ✏️ ตามจุดต่างๆ เพื่อแก้ไขได้ทันที</span>
+        <button onclick="toggleAdminMode()" class="bg-white text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-bold">ปิดโหมดแอดมิน</button>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="p-4 space-y-5">
+
+        <!-- 1. BANNER SECTION (1122x495 Aspect Ratio) -->
+        <section class="relative rounded-2xl overflow-hidden shadow-lg bg-gradient-to-r from-pink-200 via-purple-100 to-pink-100 border border-pink-200">
+            <!-- Admin Edit Button for Banner -->
+            <button onclick="openBannerEditModal()" class="admin-element hidden absolute top-3 right-3 bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-full shadow-lg z-20 flex items-center gap-1">
+                <i class="fas fa-pen"></i> แก้ไขแบนเนอร์
+            </button>
+
+            <div class="banner-aspect w-full relative flex items-center p-6 bg-cover bg-center" id="bannerBg" style="background-image: linear-gradient(rgba(255,255,255,0.4), rgba(255,255,255,0.2)), url('https://placehold.co/1122x495/FFB3C6/4A3E3D?text=Miori+Shop+Banner+Demo+(1122x495)');">
+                <div class="max-w-[70%] space-y-2 z-10">
+                    <span class="inline-block px-2.5 py-0.5 rounded-full bg-white/80 text-miori-deep text-xs font-semibold backdrop-blur-sm shadow-sm">
+                        ✨ Welcome Promotion
+                    </span>
+                    <h2 id="bannerTitle" class="text-xl md:text-3xl font-bold text-gray-800 leading-tight">
+                        ยินดีต้อนรับสู่ร้านเรา 💖
+                    </h2>
+                    <p id="bannerSub" class="text-xs md:text-sm text-gray-600">
+                        ช้อปสนุก สะสมแต้มได้ทุกออเดอร์ แลกของขวัญสุดน่ารัก
+                    </p>
+                    <button onclick="switchTab('products')" class="mt-2 bg-gradient-to-r from-miori-deep to-miori-rose text-white px-5 py-2 rounded-full text-xs md:text-sm font-medium shadow-md hover:opacity-90 transition active:scale-95 flex items-center gap-1">
+                        ช้อปเลย <i class="fas fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 2. REWARD & POINTS DISPLAY BAR -->
+        <section class="relative bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-4 border border-pink-100 shadow-sm flex items-center justify-between">
+            <!-- Admin Edit Button for Points -->
+            <button onclick="openPointsEditModal()" class="admin-element hidden absolute -top-2 -right-2 bg-purple-600 text-white text-[10px] px-2.5 py-1 rounded-full shadow-md z-10 flex items-center gap-1">
+                <i class="fas fa-pen"></i> แก้ไขแต้มลูกค้า
+            </button>
+
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-500 shadow-inner">
+                    <i class="fas fa-star text-2xl"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 font-medium">แต้มของคุณ</div>
+                    <div class="text-xl font-bold text-gray-800 flex items-baseline gap-1">
+                        <span id="userPointsDisplay">120</span> <span class="text-xs text-miori-deep">แต้ม</span>
+                    </div>
+                </div>
+            </div>
+            <div class="h-8 w-px bg-pink-200"></div>
+            <button onclick="switchTab('points')" class="flex items-center space-x-2 bg-white px-3 py-2 rounded-xl border border-pink-200 shadow-sm text-xs font-medium text-miori-deep hover:bg-pink-50 transition">
+                <i class="fas fa-gift text-amber-500"></i>
+                <span>แลกของรางวัลได้ที่นี่</span>
+                <i class="fas fa-chevron-right text-[10px]"></i>
+            </button>
+        </section>
+
+
+        <!-- 3. CATEGORIES SECTION (Icon Style) -->
+        <section class="space-y-3 relative">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="w-4 h-0.5 bg-miori-rose rounded-full"></span>
+                    <h3 class="font-bold text-gray-800 text-sm md:text-base">หมวดหมู่สินค้า</h3>
+                    <span class="w-4 h-0.5 bg-miori-rose rounded-full"></span>
+                </div>
+                <!-- Admin Add Category Button -->
+                <button onclick="openAddCategoryModal()" class="admin-element hidden bg-purple-600 text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow">
+                    <i class="fas fa-plus"></i> จัดการหมวดหมู่
+                </button>
+            </div>
+
+            <!-- Categories Scroll/Grid -->
+            <div id="categoriesContainer" class="grid grid-cols-4 gap-3 text-center">
+                <!-- Items populated dynamically -->
+            </div>
+        </section>
+
+
+        <!-- 4. FEATURED PRODUCTS SECTION -->
+        <section class="space-y-3 relative">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-1.5">
+                    <i class="fas fa-crown text-amber-400 text-sm"></i>
+                    <h3 class="font-bold text-gray-800 text-sm md:text-base">สินค้าแนะนำ</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openAddProductModal()" class="admin-element hidden bg-purple-600 text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow">
+                        <i class="fas fa-plus"></i> เพิ่มสินค้า
+                    </button>
+                    <button onclick="switchTab('products')" class="text-xs text-miori-deep hover:underline flex items-center gap-0.5">
+                        ดูทั้งหมด <i class="fas fa-chevron-right text-[9px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="productsGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <!-- Products populated dynamically -->
+            </div>
+        </section>
+
+
+        <!-- 5. REVIEW PROMOTION BANNER -->
+        <section class="relative bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-4 border border-purple-200 shadow-sm flex items-center justify-between">
+            <button onclick="openReviewEventModal()" class="admin-element hidden absolute top-2 right-2 bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded-full z-10">
+                ✏️ แก้ไขกิจกรรม
+            </button>
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-miori-purple shadow-sm text-lg">
+                    🎁
+                </div>
+                <div>
+                    <h4 id="reviewPromoTitle" class="font-bold text-xs md:text-sm text-gray-800">รีวิวสินค้า รับแต้มเพิ่ม 50 แต้ม!</h4>
+                    <p class="text-[11px] text-gray-500">แบ่งปันความประทับใจ เพื่อรับรางวัลพิเศษ</p>
+                </div>
+            </div>
+            <button onclick="switchTab('reviews')" class="w-7 h-7 rounded-full bg-white text-miori-purple flex items-center justify-center shadow-sm hover:bg-purple-50 transition">
+                <i class="fas fa-arrow-right text-xs"></i>
+            </button>
+        </section>
+
+    </main>
+
+    <!-- APP NAVIGATION SECTIONS (TAB CONTENT MODALS / VIEWS) -->
+    
+    <!-- REVIEWS TAB VIEW (Hidden by default, shown when Review Tab is selected) -->
+    <div id="reviewsView" class="hidden fixed inset-0 bg-white z-40 pt-16 pb-20 px-4 overflow-y-auto max-w-md md:max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-star text-amber-400 mr-2"></i>รีวิวจากลูกค้า & กิจกรรม</h2>
+            <button onclick="openWriteReviewModal()" class="bg-miori-deep text-white text-xs px-3 py-1.5 rounded-full shadow hover:opacity-90">
+                + เขียนรีวิวใหม่
+            </button>
+        </div>
+
+        <!-- Admin Pending Reviews Section -->
+        <div id="adminReviewApprovalSection" class="admin-element hidden mb-6 bg-purple-50 p-4 rounded-xl border border-purple-200">
+            <h3 class="font-bold text-purple-800 text-sm mb-2 flex items-center gap-1">
+                <i class="fas fa-clipboard-check"></i> ตรวจสอบ & อนุมัติรีวิว (สำหรับแอดมิน)
+            </h3>
+            <div id="pendingReviewsContainer" class="space-y-2">
+                <!-- Pending reviews loaded here -->
+            </div>
+        </div>
+
+        <div id="approvedReviewsContainer" class="space-y-3">
+            <!-- Approved Reviews List -->
+        </div>
+    </div>
+
+    <!-- POINTS & REWARDS TAB VIEW -->
+    <div id="pointsView" class="hidden fixed inset-0 bg-white z-40 pt-16 pb-20 px-4 overflow-y-auto max-w-md md:max-w-4xl mx-auto">
+        <h2 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-gift text-miori-deep mr-2"></i>บัตรสะสมแต้ม & แลกรางวัล</h2>
+        
+        <div class="bg-gradient-to-r from-miori-rose to-miori-purple text-white rounded-2xl p-5 shadow-lg mb-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs opacity-80">Miori Reward Card</p>
+                    <h3 class="text-2xl font-bold mt-1" id="pointsTabCardPoints">120 แต้ม</h3>
+                </div>
+                <i class="fas fa-crown text-amber-300 text-2xl"></i>
+            </div>
+            <p class="text-[11px] mt-4 opacity-90">รหัสสมาชิก: #MIORI-8892</p>
+        </div>
+
+        <h3 class="font-bold text-sm text-gray-800 mb-3">ของรางวัลที่คุณแลกได้</h3>
+        <div class="grid grid-cols-2 gap-3" id="rewardsGrid">
+            <!-- Reward items dynamically generated -->
+        </div>
+    </div>
+
+
+    <!-- BOTTOM FIXED NAVIGATION BAR (Directly matching wireframe) -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md md:max-w-4xl mx-auto bg-white/95 backdrop-blur-md border-t border-pink-100 z-40 py-1.5 px-4 flex justify-around items-center">
+        <!-- 1. Home -->
+        <button onclick="switchTab('home')" id="nav-home" class="nav-btn active flex flex-col items-center text-miori-deep">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[10px] font-medium mt-0.5">หน้าหลัก</span>
+        </button>
+
+        <!-- 2. Products -->
+        <button onclick="switchTab('products')" id="nav-products" class="nav-btn flex flex-col items-center text-gray-400 hover:text-miori-deep">
+            <i class="fas fa-th-large text-lg"></i>
+            <span class="text-[10px] font-medium mt-0.5">สินค้า</span>
+        </button>
+
+        <!-- 3. Points Card (Center Highlighted Icon from Wireframe) -->
+        <button onclick="switchTab('points')" id="nav-points" class="flex flex-col items-center -mt-5">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-miori-deep to-miori-purple text-white flex items-center justify-center shadow-lg border-2 border-white transform hover:scale-105 transition">
+                <i class="fas fa-gift text-xl"></i>
+            </div>
+            <span class="text-[10px] font-bold text-miori-deep mt-0.5">สะสมแต้ม</span>
+        </button>
+
+        <!-- 4. Review -->
+        <button onclick="switchTab('reviews')" id="nav-reviews" class="nav-btn flex flex-col items-center text-gray-400 hover:text-miori-deep">
+            <i class="fas fa-comment-dots text-lg"></i>
+            <span class="text-[10px] font-medium mt-0.5">รีวิว</span>
+        </button>
+
+        <!-- 5. Account / Admin Toggle Quick Access -->
+        <button onclick="toggleAdminMode()" id="nav-account" class="nav-btn flex flex-col items-center text-gray-400 hover:text-miori-deep">
+            <i class="fas fa-user-cog text-lg"></i>
+            <span class="text-[10px] font-medium mt-0.5">บัญชี / หลังบ้าน</span>
+        </button>
+    </nav>
+
+
+    <!-- ==================== MODALS FOR IN-PLACE EDITING & ACTIONS ==================== -->
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-4 shadow-xl">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-sm">ค้นหาสินค้าในร้าน</h3>
+                <button onclick="toggleSearchModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="พิมพ์ชื่อสินค้า เช่น กระเป๋า, เสื้อ..." class="w-full border border-pink-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-miori-deep">
+            <div id="searchResults" class="mt-3 space-y-2 max-h-60 overflow-y-auto">
+                <!-- Search results -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Edit Banner Modal -->
+    <div id="bannerEditModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl space-y-4">
+            <h3 class="font-bold text-gray-800 text-base border-b pb-2">✏️ แก้ไขแบนเนอร์ (หน้าบ้าน)</h3>
+            <div>
+                <label class="text-xs font-semibold text-gray-600">ข้อความหัวเรื่องหลัก</label>
+                <input type="text" id="editBannerTitleInput" class="w-full border border-gray-300 rounded-lg p-2 text-sm mt-1">
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-gray-600">ข้อความย่อย</label>
+                <input type="text" id="editBannerSubInput" class="w-full border border-gray-300 rounded-lg p-2 text-sm mt-1">
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-gray-600">URL รูปภาพแบนเนอร์ (ขนาดแนะนำ 1122x495)</label>
+                <input type="text" id="editBannerImgInput" class="w-full border border-gray-300 rounded-lg p-2 text-sm mt-1" placeholder="https://placehold.co/1122x495/...">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('bannerEditModal')" class="px-4 py-2 text-xs rounded-lg border border-gray-300">ยกเลิก</button>
+                <button onclick="saveBannerChanges()" class="px-4 py-2 text-xs rounded-lg bg-purple-600 text-white font-medium">บันทึกการแก้ไข</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Edit Points Modal -->
+    <div id="pointsEditModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl space-y-4">
+            <h3 class="font-bold text-gray-800 text-base border-b pb-2">✏️ แก้ไขแต้มลูกค้า (แอดมิน)</h3>
+            <div>
+                <label class="text-xs font-semibold text-gray-600">จำนวนแต้มปัจจุบัน</label>
+                <input type="number" id="editPointsInput" class="w-full border border-gray-300 rounded-lg p-2 text-sm mt-1">
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeModal('pointsEditModal')" class="px-4 py-2 text-xs rounded-lg border border-gray-300">ยกเลิก</button>
+                <button onclick="savePointsChanges()" class="px-4 py-2 text-xs rounded-lg bg-purple-600 text-white font-medium">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Add/Edit Product Modal -->
+    <div id="productModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl space-y-3">
+            <h3 id="productModalTitle" class="font-bold text-gray-800 text-base border-b pb-2">🛍️ เพิ่ม/แก้ไขสินค้า</h3>
+            <input type="hidden" id="editProductId">
+            <div>
+                <label class="text-xs font-semibold text-gray-600">ชื่อสินค้า</label>
+                <input type="text" id="prodNameInput" class="w-full border rounded-lg p-2 text-sm mt-1">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-xs font-semibold text-gray-600">ราคา (บาท)</label>
+                    <input type="number" id="prodPriceInput" class="w-full border rounded-lg p-2 text-sm mt-1">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600">แต้มที่จะได้รับ</label>
+                    <input type="number" id="prodPointsInput" class="w-full border rounded-lg p-2 text-sm mt-1">
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-gray-600">หมวดหมู่</label>
+                <select id="prodCategorySelect" class="w-full border rounded-lg p-2 text-sm mt-1">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('productModal')" class="px-4 py-2 text-xs rounded-lg border border-gray-300">ยกเลิก</button>
+                <button onclick="saveProduct()" class="px-4 py-2 text-xs rounded-lg bg-purple-600 text-white font-medium">บันทึกสินค้า</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Write Review Modal -->
+    <div id="writeReviewModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl space-y-3">
+            <h3 class="font-bold text-gray-800 text-base border-b pb-2">✍️ เขียนรีวิวสินค้า</h3>
+            <div>
+                <label class="text-xs font-semibold text-gray-600">ชื่อของคุณ</label>
+                <input type="text" id="reviewerName" class="w-full border rounded-lg p-2 text-sm mt-1" placeholder="เช่น น้องมินิ">
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-gray-600">คะแนนความพึงพอใจ</label>
+                <select id="reviewRating" class="w-full border rounded-lg p-2 text-sm mt-1">
+                    <option value="5">⭐⭐⭐⭐⭐ (5 ดาว)</option>
+                    <option value="4">⭐⭐⭐⭐ (4 ดาว)</option>
+                    <option value="3">⭐⭐⭐ (3 ดาว)</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-gray-600">ข้อความรีวิว</label>
+                <textarea id="reviewComment" rows="3" class="w-full border rounded-lg p-2 text-sm mt-1" placeholder="สินค้าน่ารักมาก คุณภาพดีเยี่ยม..."></textarea>
+            </div>
+            <p class="text-[10px] text-gray-400">* รีวิวของคุณจะได้รับการตรวจสอบโดยแอดมินก่อนแสดงผลบนเว็บ</p>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('writeReviewModal')" class="px-4 py-2 text-xs rounded-lg border border-gray-300">ยกเลิก</button>
+                <button onclick="submitUserReview()" class="px-4 py-2 text-xs rounded-lg bg-miori-deep text-white font-medium">ส่งรีวิว</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Message -->
+    <div id="toast" class="hidden fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-4 py-2 rounded-full shadow-xl z-50 flex items-center gap-2">
+        <span id="toastMsg">บันทึกข้อมูลเรียบร้อย</span>
+    </div>
+
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // State Data (Demo Data)
+        let isAdmin = false;
+        let userPoints = 120;
+        
+        let categories = [
+            { id: 'bag', name: 'กระเป๋า', icon: 'fa-shopping-bag' },
+            { id: 'clothes', name: 'เสื้อผ้า', icon: 'fa-tshirt' },
+            { id: 'use', name: 'ของใช้', icon: 'fa-mug-hot' },
+            { id: 'cute', name: 'ของน่ารัก', icon: 'fa-smile-beam' }
+        ];
+
+        let products = [
+            { id: 1, name: 'กระเป๋าพาสเทลมินิ', price: 350, points: 35, category: 'bag', img: 'https://placehold.co/300x300/FFB3C6/4A3E3D?text=Mini+Bag' },
+            { id: 2, name: 'เสื้อยืดไหมพรมเกาหลี', price: 290, points: 29, category: 'clothes', img: 'https://placehold.co/300x300/FFE5EC/4A3E3D?text=Korean+Shirt' },
+            { id: 3, name: 'แก้วน้ำเก็บความเย็น', price: 190, points: 19, category: 'use', img: 'https://placehold.co/300x300/E899DC/FFFFFF?text=Cute+Mug' },
+            { id: 4, name: 'พวงกุญแจตุ๊กตานุ่ม', price: 120, points: 12, category: 'cute', img: 'https://placehold.co/300x300/FDE2E4/4A3E3D?text=Keychain' }
+        ];
+
+        let rewards = [
+            { id: 1, name: 'ส่วนลด 50 บาท', pointsRequired: 100, icon: '🏷️' },
+            { id: 2, name: 'กระเป๋าผ้า Miori Bag', pointsRequired: 250, icon: '🛍️' },
+            { id: 3, name: 'แก้วน้ำเก็บความเย็น Limited', pointsRequired: 400, icon: '🥤' }
+        ];
+
+        let reviews = [
+            { id: 1, name: 'คุณนลิน', rating: 5, comment: 'สินค้าน่ารักตรงปกมากค่ะ จัดส่งไว สะสมแต้มสะดวกมากๆ', approved: true },
+            { id: 2, name: 'คุณแพรว', rating: 5, comment: 'แก้วน้ำเก็บความเย็นใช้ดีมากค่ะ แนะนำเลย!', approved: true }
+        ];
+
+        let pendingReviews = [
+            { id: 3, name: 'คุณเมย์ (รออนุมัติ)', rating: 5, comment: 'เสื้อยืดน่ารัก ผ้านุ่มมาก ได้แต้มสะสมทันทีเลย', approved: false }
+        ];
+
+        // Initialize App
+        window.onload = function() {
+            renderCategories();
+            renderProducts();
+            renderRewards();
+            renderReviews();
+        };
+
+        // Render Functions
+        function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = categories.map(cat => `
+                <div class="flex flex-col items-center group cursor-pointer" onclick="filterByCategory('${cat.id}')">
+                    <div class="w-14 h-14 rounded-full bg-pink-50 border border-pink-100 flex items-center justify-center text-miori-deep text-lg shadow-sm group-hover:bg-miori-deep group-hover:text-white transition">
+                        <i class="fas ${cat.icon}"></i>
+                    </div>
+                    <span class="text-xs font-medium text-gray-700 mt-1.5">${cat.name}</span>
+                </div>
+            `).join('');
+
+            // Also update category dropdown in product modal
+            const select = document.getElementById('prodCategorySelect');
+            select.innerHTML = categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+        }
+
+        function renderProducts(filterCategory = 'all') {
+            const container = document.getElementById('productsGrid');
+            let filtered = products;
+            if (filterCategory !== 'all') {
+                filtered = products.filter(p => p.category === filterCategory);
+            }
+
+            container.innerHTML = filtered.map(p => `
+                <div class="relative bg-white rounded-2xl border border-pink-100 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                    <!-- Admin Product Edit & Delete buttons inside card -->
+                    <div class="admin-element hidden absolute top-2 right-2 z-10 flex gap-1">
+                        <button onclick="openEditProductModal(${p.id})" class="w-6 h-6 rounded-full bg-purple-600 text-white text-[10px] flex items-center justify-center shadow">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button onclick="deleteProduct(${p.id})" class="w-6 h-6 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center shadow">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <div>
+                        <div class="relative">
+                            <img src="${p.img}" alt="${p.name}" class="w-full aspect-square object-cover">
+                            <button class="absolute top-2 left-2 text-gray-300 hover:text-miori-rose text-sm">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="p-2.5">
+                            <h4 class="font-medium text-xs text-gray-800 line-clamp-1">${p.name}</h4>
+                            <div class="text-[10px] text-amber-500 mt-0.5"><i class="fas fa-star"></i> รับ ${p.points} แต้ม</div>
+                            <div class="font-bold text-sm text-miori-deep mt-1">฿${p.price}</div>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 pt-0">
+                        <button onclick="addToCart('${p.name}')" class="w-full bg-pink-50 hover:bg-miori-deep hover:text-white text-miori-deep rounded-xl py-1.5 text-xs font-medium transition flex items-center justify-center space-x-1">
+                            <i class="fas fa-shopping-basket text-[10px]"></i>
+                            <span>ใส่ตะกร้า</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRewards() {
+            const container = document.getElementById('rewardsGrid');
+            container.innerHTML = rewards.map(r => `
+                <div class="border border-pink-100 rounded-xl p-3 bg-pink-50/50 flex flex-col justify-between">
+                    <div>
+                        <div class="text-2xl mb-1">${r.icon}</div>
+                        <h4 class="font-bold text-xs text-gray-800">${r.name}</h4>
+                        <p class="text-[11px] text-miori-deep font-semibold mt-1">${r.pointsRequired} แต้ม</p>
+                    </div>
+                    <button onclick="redeemReward('${r.name}', ${r.pointsRequired})" class="mt-2 w-full bg-white text-miori-deep border border-miori-deep rounded-lg py-1 text-xs font-medium hover:bg-miori-deep hover:text-white transition">
+                        แลกรางวัล
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderReviews() {
+            const container = document.getElementById('approvedReviewsContainer');
+            container.innerHTML = reviews.map(rev => `
+                <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/50">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-xs text-gray-800">${rev.name}</span>
+                        <div class="text-amber-400 text-xs">
+                            ${'★'.repeat(rev.rating)}
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-600">${rev.comment}</p>
+                </div>
+            `).join('');
+
+            // Admin Pending Reviews
+            const pendingContainer = document.getElementById('pendingReviewsContainer');
+            if(pendingReviews.length === 0) {
+                pendingContainer.innerHTML = `<p class="text-xs text-gray-400 italic">ไม่มีรายการรีวิวที่รออนุมัติ</p>`;
+            } else {
+                pendingContainer.innerHTML = pendingReviews.map(rev => `
+                    <div class="bg-white p-2.5 rounded-lg border border-purple-200 flex justify-between items-center text-xs">
+                        <div>
+                            <span class="font-bold">${rev.name}</span> (${rev.rating}★)
+                            <p class="text-gray-500 text-[11px]">${rev.comment}</p>
+                        </div>
+                        <div class="flex space-x-1">
+                            <button onclick="approveReview(${rev.id})" class="bg-green-600 text-white px-2 py-1 rounded text-[10px]">อนุมัติ</button>
+                            <button onclick="rejectReview(${rev.id})" class="bg-red-500 text-white px-2 py-1 rounded text-[10px]">ปฏิเสธ</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // TOGGLE ADMIN MODE (In-Place Edit Toggle)
+        function toggleAdminMode() {
+            isAdmin = !isAdmin;
+            const adminElements = document.querySelectorAll('.admin-element');
+            const noticeBar = document.getElementById('adminNoticeBar');
+            const adminBtnText = document.getElementById('adminStatusText');
+
+            if (isAdmin) {
+                adminElements.forEach(el => el.classList.remove('hidden'));
+                noticeBar.classList.remove('hidden');
+                adminBtnText.innerText = 'โหมดแอดมิน (เปิด)';
+                showToast('🔑 เข้าสู่โหมดแอดมิน: สามารถกดแก้ไขตามจุดได้แล้ว');
+            } else {
+                adminElements.forEach(el => el.classList.add('hidden'));
+                noticeBar.classList.add('hidden');
+                adminBtnText.innerText = 'โหมดทั่วไป';
+                showToast('🔒 ออกจากโหมดแอดมินแล้ว');
+            }
+        }
+
+        // Navigation Tabs Handling
+        function switchTab(tabName) {
+            // Hide all tab overlay views
+            document.getElementById('reviewsView').classList.add('hidden');
+            document.getElementById('pointsView').classList.add('hidden');
+
+            if (tabName === 'reviews') {
+                document.getElementById('reviewsView').classList.remove('hidden');
+            } else if (tabName === 'points') {
+                document.getElementById('pointsView').classList.remove('hidden');
+            } else if (tabName === 'products') {
+                renderProducts('all');
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Banner Admin Edit Logic
+        function openBannerEditModal() {
+            document.getElementById('editBannerTitleInput').value = document.getElementById('bannerTitle').innerText;
+            document.getElementById('editBannerSubInput').value = document.getElementById('bannerSub').innerText;
+            document.getElementById('bannerEditModal').classList.remove('hidden');
+        }
+
+        function saveBannerChanges() {
+            const title = document.getElementById('editBannerTitleInput').value;
+            const sub = document.getElementById('editBannerSubInput').value;
+            const img = document.getElementById('editBannerImgInput').value;
+
+            if (title) document.getElementById('bannerTitle').innerText = title;
+            if (sub) document.getElementById('bannerSub').innerText = sub;
+            if (img) document.getElementById('bannerBg').style.backgroundImage = `linear-gradient(rgba(255,255,255,0.4), rgba(255,255,255,0.2)), url('${img}')`;
+
+            closeModal('bannerEditModal');
+            showToast('อัปเดตแบนเนอร์เรียบร้อยแล้ว');
+        }
+
+        // Points Admin Edit Logic
+        function openPointsEditModal() {
+            document.getElementById('editPointsInput').value = userPoints;
+            document.getElementById('pointsEditModal').classList.remove('hidden');
+        }
+
+        function savePointsChanges() {
+            const val = parseInt(document.getElementById('editPointsInput').value);
+            if (!isNaN(val)) {
+                userPoints = val;
+                document.getElementById('userPointsDisplay').innerText = userPoints;
+                document.getElementById('pointsTabCardPoints').innerText = userPoints + ' แต้ม';
+                closeModal('pointsEditModal');
+                showToast('แก้ไขแต้มสะสมเรียบร้อยแล้ว');
+            }
+        }
+
+        // Product CRUD Logic
+        function openAddProductModal() {
+            document.getElementById('productModalTitle').innerText = '🛍️ เพิ่มสินค้าใหม่';
+            document.getElementById('editProductId').value = '';
+            document.getElementById('prodNameInput').value = '';
+            document.getElementById('prodPriceInput').value = '';
+            document.getElementById('prodPointsInput').value = '';
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function openEditProductModal(id) {
+            const prod = products.find(p => p.id === id);
+            if (!prod) return;
+            document.getElementById('productModalTitle').innerText = '✏️ แก้ไขสินค้า';
+            document.getElementById('editProductId').value = prod.id;
+            document.getElementById('prodNameInput').value = prod.name;
+            document.getElementById('prodPriceInput').value = prod.price;
+            document.getElementById('prodPointsInput').value = prod.points;
+            document.getElementById('prodCategorySelect').value = prod.category;
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function saveProduct() {
+            const id = document.getElementById('editProductId').value;
+            const name = document.getElementById('prodNameInput').value;
+            const price = parseFloat(document.getElementById('prodPriceInput').value) || 0;
+            const points = parseInt(document.getElementById('prodPointsInput').value) || 0;
+            const category = document.getElementById('prodCategorySelect').value;
+
+            if (!name) {
+                showToast('กรุณากรอกชื่อสินค้า');
+                return;
+            }
+
+            if (id) {
+                // Edit
+                const prod = products.find(p => p.id == id);
+                if (prod) {
+                    prod.name = name;
+                    prod.price = price;
+                    prod.points = points;
+                    prod.category = category;
+                }
+            } else {
+                // Add New
+                const newProd = {
+                    id: Date.now(),
+                    name: name,
+                    price: price,
+                    points: points,
+                    category: category,
+                    img: `https://placehold.co/300x300/FFB3C6/4A3E3D?text=${encodeURIComponent(name)}`
+                };
+                products.unshift(newProd);
+            }
+
+            renderProducts();
+            closeModal('productModal');
+            showToast('บันทึกข้อมูลสินค้าเรียบร้อย');
+        }
+
+        function deleteProduct(id) {
+            products = products.filter(p => p.id !== id);
+            renderProducts();
+            showToast('ลบสินค้าเรียบร้อยแล้ว');
+        }
+
+        // Category Filter
+        function filterByCategory(catId) {
+            renderProducts(catId);
+            showToast(`แสดงสินค้าหมวดหมู่: ${catId}`);
+        }
+
+        // Reviews System Logic
+        function openWriteReviewModal() {
+            document.getElementById('writeReviewModal').classList.remove('hidden');
+        }
+
+        function submitUserReview() {
+            const name = document.getElementById('reviewerName').value || 'ลูกค้าทั่วไป';
+            const rating = parseInt(document.getElementById('reviewRating').value);
+            const comment = document.getElementById('reviewComment').value;
+
+            if (!comment) {
+                showToast('กรุณากรอกข้อความรีวิว');
+                return;
+            }
+
+            pendingReviews.push({
+                id: Date.now(),
+                name: name,
+                rating: rating,
+                comment: comment,
+                approved: false
+            });
+
+            renderReviews();
+            closeModal('writeReviewModal');
+            showToast('ส่งรีวิวแล้ว! รอแอนมินตรวจสอบอนุมัติ');
+        }
+
+        function approveReview(id) {
+            const idx = pendingReviews.findIndex(r => r.id === id);
+            if (idx > -1) {
+                const item = pendingReviews.splice(idx, 1)[0];
+                item.approved = true;
+                reviews.unshift(item);
+                renderReviews();
+                showToast('อนุมัติรีวิวเรียบร้อยแล้ว');
+            }
+        }
+
+        function rejectReview(id) {
+            pendingReviews = pendingReviews.filter(r => r.id !== id);
+            renderReviews();
+            showToast('ลบรีวิวเรียบร้อยแล้ว');
+        }
+
+        // Redeem Reward Logic
+        function redeemReward(name, reqPoints) {
+            if (userPoints >= reqPoints) {
+                userPoints -= reqPoints;
+                document.getElementById('userPointsDisplay').innerText = userPoints;
+                document.getElementById('pointsTabCardPoints').innerText = userPoints + ' แต้ม';
+                showToast(`🎉 แลกรับ "${name}" สำเร็จ!`);
+            } else {
+                showToast(`❌ แต้มไม่พอ (ต้องการ ${reqPoints} แต้ม)`);
+            }
+        }
+
+        // Search Logic
+        function toggleSearchModal() {
+            const modal = document.getElementById('searchModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+            
+            if (!query) {
+                resultsContainer.innerHTML = '';
+                return;
+            }
+
+            const matched = products.filter(p => p.name.toLowerCase().includes(query));
+            if (matched.length === 0) {
+                resultsContainer.innerHTML = `<p class="text-xs text-gray-400">ไม่พบสินค้าที่คุณค้นหา</p>`;
+            } else {
+                resultsContainer.innerHTML = matched.map(p => `
+                    <div class="flex items-center space-x-2 border-b pb-2">
+                        <img src="${p.img}" class="w-10 h-10 rounded-lg object-cover">
+                        <div>
+                            <div class="text-xs font-bold">${p.name}</div>
+                            <div class="text-[11px] text-miori-deep">฿${p.price}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Helpers
+        function addToCart(name) {
+            showToast(`เพิ่ม "${name}" ลงตะกร้าแล้ว`);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
